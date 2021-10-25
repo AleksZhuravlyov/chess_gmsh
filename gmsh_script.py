@@ -98,7 +98,7 @@ for i in range(hex_n):
     gmsh.model.occ.add_volume([gmsh.model.occ.add_surface_loop([s0, s1, s2, s3, s4, s5])])
 
 
-gmsh.model.occ.fragment([(3, 1)], [(3, i) for i in range(2, hex_n + 1)])
+gmsh.model.occ.fuse([(3, 1)], [(3, i) for i in range(2, hex_n + 1)])
 
 gmsh.model.occ.synchronize()
 
