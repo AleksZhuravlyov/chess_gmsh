@@ -1,3 +1,5 @@
+import sys
+
 import gmsh
 import json
 
@@ -7,7 +9,10 @@ gmsh.model.add("chess_gmsh")
 
 lc = 1e-5
 
-with open('throats_polygons_edited.json') as file:
+file_name = 'throats_polygons_edited'
+# file_name = 'throats_polygons_rotated'
+
+with open(file_name + '.json') as file:
     model = json.load(file)
 
 hexahedrons = model['polygons']
@@ -75,9 +80,28 @@ for i in range(hex_n):
     stop = 1 + i * 10 + 9 + 1
     add_volume([add_surface_loop(range(start, stop))])
 
-objectDimTags = [(3, 1)]
-for i in range(2, hex_n + 1):
-    objectDimTags = gmsh.model.occ.fuse(objectDimTags, [(3, i)])[0]
+print()
+print()
+
+entities_store = gmsh.model.occ.get_entities(3)
+
+print('entities_store', entities_store)
+outDimTags = [entities_store[0]]
+del entities_store[0]
+
+while entities_store:
+    print()
+    print('=====')
+    objectDimTags = entities_store[0:1]
+    del entities_store[0]
+    print('objectDimTags', objectDimTags)
+    print('toolDimTags', outDimTags)
+    outDimTags, outDimTagsMap = gmsh.model.occ.fuse(objectDimTags, outDimTags)
+    print('-><-')
+    print('outDimTags', outDimTags)
+    print('outDimTagsMap', outDimTagsMap)
+    print('entities', gmsh.model.occ.get_entities(3))
+    print('=====')
 
 gmsh.model.occ.synchronize()
 
@@ -102,5 +126,7 @@ gmsh.model.mesh.generate(3)
 
 gmsh.write('chess_gmsh.vtk')
 gmsh.write('chess_gmsh.msh')
+
+print('get_entities', gmsh.model.occ.get_entities(3))
 
 gmsh.finalize()
